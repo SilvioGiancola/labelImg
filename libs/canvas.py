@@ -11,6 +11,11 @@ except ImportError:
 
 from libs.shape import Shape
 from libs.lib import distance
+from libs.lib import generateColorByText
+import cv2
+import numpy as np
+
+from api import detectSeeds, classifySeeds
 
 CURSOR_DEFAULT = Qt.ArrowCursor
 CURSOR_POINT = Qt.PointingHandCursor
@@ -25,6 +30,7 @@ class Canvas(QWidget):
     zoomRequest = pyqtSignal(int)
     scrollRequest = pyqtSignal(int, int)
     newShape = pyqtSignal()
+    addShape = pyqtSignal()
     selectionChanged = pyqtSignal(bool)
     shapeMoved = pyqtSignal()
     drawingPolygon = pyqtSignal(bool)
@@ -272,8 +278,10 @@ class Canvas(QWidget):
             maxX = targetPos.x()
             maxY = targetPos.y()
             self.current.addPoint(QPointF(maxX, minY))
-            self.current.addPoint(targetPos)
+            self.current.addPoint(QPointF(maxX, maxY))
             self.current.addPoint(QPointF(minX, maxY))
+            print(minX, minY)
+            print(maxX, maxY)
             self.finalise()
         elif not self.outOfPixmap(pos):
             self.current = Shape()
@@ -694,6 +702,88 @@ class Canvas(QWidget):
         self.shapes = list(shapes)
         self.current = None
         self.repaint()
+
+    def detectShapes(self, image_QT):
+        image_QT = image_QT.convertToFormat(4)
+        width = image_QT.width()
+        height = image_QT.height()
+        ptr = image_QT.bits()
+        ptr = image_QT.bits()
+        ptr.setsize(image_QT.byteCount())
+        arr = np.array(ptr).reshape(height, width, 4)
+        # cv2.imwrite("test.png",arr)
+        arr = cv2.cvtColor(arr, cv2.COLOR_RGBA2RGB)
+
+        cnt_germ, cnt_nongerm = classifySeeds(arr)
+        print(cnt_germ)
+        print(cnt_nongerm)
+
+        for germ in cnt_germ:
+            minX = germ[0]
+            minY = germ[1]
+            maxX = germ[0] + germ[2]
+            maxY = germ[1] + germ[3]
+            
+            self.current = Shape()
+            self.current.addPoint(QPointF(minX, minY))
+            self.current.addPoint(QPointF(maxX, minY))
+            self.current.addPoint(QPointF(maxX, maxY))
+            self.current.addPoint(QPointF(minX, maxY))
+            self.current.label = "germinated"
+            self.current.close()
+
+            self.shapes.append(self.current)
+            self.current = None
+            self.newShape.emit()
+            self.update()
+            self.repaint()
+
+            
+        for germ in cnt_nongerm:
+            minX = germ[0]
+            minY = germ[1]
+            maxX = germ[0] + germ[2]
+            maxY = germ[1] + germ[3]
+            
+            self.current = Shape()
+            self.current.addPoint(QPointF(minX, minY))
+            self.current.addPoint(QPointF(maxX, minY))
+            self.current.addPoint(QPointF(maxX, maxY))
+            self.current.addPoint(QPointF(minX, maxY))
+            self.current.label = "non-germinated"
+            self.current.close()
+
+            self.shapes.append(self.current)
+            self.current = None
+            self.newShape.emit()
+            self.update()
+            self.repaint()
+        # print(image_QT.size())
+        # print(image_QT.size()[0])
+        # print(image_QT.size()[1])
+        # # print(image_QT.shape)
+        # image_CV = cv2.mat(image_QT.size[0],image_QT.size[1], cv2.CV_8uC3, image_QT.scaneline())
+        for i in range(3):
+            minX = minY= 10 + len(self.shapes)*30
+            maxX = maxY= 100 + len(self.shapes)*30
+            # print(minX, minY)
+            # print(maxX, maxY)
+            
+            self.current = Shape()
+            self.current.addPoint(QPointF(minX, minY))
+            self.current.addPoint(QPointF(maxX, minY))
+            self.current.addPoint(QPointF(maxX, maxY))
+            self.current.addPoint(QPointF(minX, maxY))
+            self.current.label = "germinated"
+            self.current.close()
+
+            self.shapes.append(self.current)
+            self.current = None
+            self.newShape.emit()
+            self.update()
+            self.repaint()
+
+            
 
     def setShapeVisible(self, shape, value):
         self.visible[shape] = value

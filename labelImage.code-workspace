@@ -1,0 +1,72 @@
+{
+    "folders": [
+        {
+            "name": "labelImage",
+            "path": "."
+        }
+    ],
+    "settings": {
+        // editor settings
+        "window.zoomLevel": 0,
+        "breadcrumbs.enabled": true,
+        "editor.rulers": [72, 79, 119],
+        "editor.minimap.enabled": false,
+        "editor.formatOnType": true,
+        // explorer settings
+        "files.exclude": {
+            "**/.git": true,
+            "**/.ipynb_checkpoints": true,
+            "**/__pycache__": true,
+            "**/.DS_Store": false,
+            "**/.hg": false,
+            "**/.svn": false,
+            "**/CVS": false
+        },
+        "files.watcherExclude": {
+            "**/exps/**": true,
+            "**/models/**": true
+        },
+        // python settings
+        "python.pythonPath": "/Users/giancos/anaconda/envs/pyqt/bin/python",
+        "python.formatting.provider": "yapf",
+        "python.formatting.yapfArgs": [
+            "--style=google"
+        ],
+        "python.linting.pep8Enabled": true,
+		"python.linting.pylintEnabled": true,
+		"python.linting.flake8Enabled": true,
+		"python.linting.flake8Args": ["--ignore=E128"],
+
+        "python.linting.pep8Args": [
+            "--ignore=E128"
+        ],
+        "python.linting.pylintArgs": [
+            "--disable=C0111,C0103,C0411,C1801,R0913,E0611",
+            "--generated-members=torch.**, argparse.Namespace.**, PyQt5.QtWidgets.**",
+            "--ignored-modules=torch"
+        ],
+        
+        // debugger settings
+        "launch": {
+            "version": "0.2.0",
+            "configurations": [
+                {
+                    "name": "Python: Full Debug",
+                    "type": "python",
+                    "request": "launch",
+                    "program": "${file}",
+                    "console": "integratedTerminal",
+                    "debugStdLib": true
+                },
+                {
+                    "name": "Python: Current File",
+                    "type": "python",
+                    "request": "launch",
+                    "program": "${file}",
+                    "console": "integratedTerminal",
+                    "debugStdLib": false
+                }
+            ]
+        },
+    }
+}
