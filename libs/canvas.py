@@ -710,6 +710,7 @@ class Canvas(QWidget):
         arr = np.array(ptr).reshape(height, width, 4)
         # cv2.imwrite("test.png",arr)
         arr = cv2.cvtColor(arr, cv2.COLOR_RGBA2RGB)
+        arr = cv2.cvtColor(arr, cv2.COLOR_BGR2RGB)
 
         cnt_germ, cnt_nongerm = classifySeeds(arr)
         # print(cnt_germ)

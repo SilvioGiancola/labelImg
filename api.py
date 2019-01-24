@@ -7,7 +7,7 @@ def detectSeeds(image):
     logging.info("Detecting seeds...")
     ret, maskR = cv2.threshold(image[:,:,0], 80, 255, cv2.THRESH_BINARY)
     ret, maskG = cv2.threshold(image[:,:,1], 180, 255, cv2.THRESH_BINARY_INV)
-    ret, maskB = cv2.threshold(image[:,:,2], 180, 255, cv2.THRESH_BINARY_INV)
+    ret, maskB = cv2.threshold(image[:,:,2], 150, 255, cv2.THRESH_BINARY_INV)
     # ret, maskR = cv2.threshold(
     #     image[:, :, 0], 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
     # ret, maskG = cv2.threshold(
@@ -15,6 +15,7 @@ def detectSeeds(image):
     # ret, maskB = cv2.threshold(
     #     image[:, :, 2], 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
     mask = cv2.bitwise_and(maskR, maskB)
+    mask = cv2.bitwise_and(mask, maskG)
 
     # Find Contours
     im2, contours, hierarchy = cv2.findContours(
