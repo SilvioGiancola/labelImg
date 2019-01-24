@@ -47,6 +47,9 @@ from libs.ustr import ustr
 from libs.version import __version__
 from libs.hashableQListWidgetItem import HashableQListWidgetItem
 
+import collections
+import numpy as np
+
 __appname__ = 'labelImg'
 
 # Utility functions and classes.
@@ -159,6 +162,9 @@ class MainWindow(QMainWindow, WindowMixin):
         self.labelList.itemChanged.connect(self.labelItemChanged)
         listLayout.addWidget(self.labelList)
 
+        self.countLabel = QLabel()
+        listLayout.addWidget(self.countLabel)
+
         self.dock = QDockWidget(getStr('boxLabelText'), self)
         self.dock.setObjectName(getStr('labels'))
         self.dock.setWidget(labelListContainer)
@@ -192,7 +198,6 @@ class MainWindow(QMainWindow, WindowMixin):
         self.canvas.scrollRequest.connect(self.scrollRequest)
 
         self.canvas.newShape.connect(self.newShape)
-        self.canvas.addShape.connect(self.addShape)
         self.canvas.shapeMoved.connect(self.setDirty)
         self.canvas.selectionChanged.connect(self.shapeSelectionChanged)
         self.canvas.drawingPolygon.connect(self.toggleDrawingSensitive)
@@ -632,13 +637,16 @@ class MainWindow(QMainWindow, WindowMixin):
         self.canvas.setEditing(False)
         self.actions.create.setEnabled(False)
         self.actions.detect.setEnabled(False)
-        
+        self.updateCount()
+
     def detectShape(self):
         assert self.beginner()
         # self.canvas.setEditing(False)
         # self.actions.create.setEnabled(False)
         # self.actions.detect.setEnabled(False)
         self.canvas.detectShapes(self.image)
+        self.updateCount()
+
 
     def toggleDrawingSensitive(self, drawing=True):
         """In the middle of drawing, toggling between modes should be disabled."""
@@ -744,6 +752,7 @@ class MainWindow(QMainWindow, WindowMixin):
         self.actions.edit.setEnabled(selected)
         self.actions.shapeLineColor.setEnabled(selected)
         self.actions.shapeFillColor.setEnabled(selected)
+        self.updateCount()
 
     def addLabel(self, shape):
         shape.paintLabel = self.displayLabelOption.isChecked()
@@ -756,6 +765,14 @@ class MainWindow(QMainWindow, WindowMixin):
         self.labelList.addItem(item)
         for action in self.actions.onShapesPresent:
             action.setEnabled(True)
+        self.updateCount()
+
+    def updateCount(self):
+        cnt = collections.Counter(
+            np.array([shape.label for shape in self.canvas.shapes]))
+        self.countLabel.setText(
+            f"Germinated: Yes {cnt['germinated']} / No {cnt['non-germinated']}")
+
 
     def remLabel(self, shape):
         if shape is None:
@@ -765,6 +782,7 @@ class MainWindow(QMainWindow, WindowMixin):
         self.labelList.takeItem(self.labelList.row(item))
         del self.shapesToItems[shape]
         del self.itemsToShapes[item]
+        self.updateCount()
 
     def loadLabels(self, shapes):
         s = []
@@ -860,12 +878,6 @@ class MainWindow(QMainWindow, WindowMixin):
             self.canvas.setShapeVisible(shape, item.checkState() == Qt.Checked)
 
     # Callback functions:
-    def addShape(self):
-        text = self.canvas.current.label
-        generate_color = generateColorByText(text)
-        shape = self.canvas.setLastLabel(text, generate_color, generate_color)
-        self.addLabel(shape)
-
     def newShape(self):
         """Pop-up and give focus to the label editor.
 
@@ -874,7 +886,6 @@ class MainWindow(QMainWindow, WindowMixin):
         # print(self.canvas.shapes[-1].label)
         if self.canvas.shapes[-1].label is not None:
             text = self.canvas.shapes[-1].label
-            print(self.canvas.shapes[-1].label)
         elif not self.useDefaultLabelCheckbox.isChecked() or not self.defaultLabelTextLine.text():
             if len(self.labelHist) > 0:
                 self.labelDialog = LabelDialog(

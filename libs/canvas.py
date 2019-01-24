@@ -30,7 +30,6 @@ class Canvas(QWidget):
     zoomRequest = pyqtSignal(int)
     scrollRequest = pyqtSignal(int, int)
     newShape = pyqtSignal()
-    addShape = pyqtSignal()
     selectionChanged = pyqtSignal(bool)
     shapeMoved = pyqtSignal()
     drawingPolygon = pyqtSignal(bool)
@@ -280,8 +279,6 @@ class Canvas(QWidget):
             self.current.addPoint(QPointF(maxX, minY))
             self.current.addPoint(QPointF(maxX, maxY))
             self.current.addPoint(QPointF(minX, maxY))
-            print(minX, minY)
-            print(maxX, maxY)
             self.finalise()
         elif not self.outOfPixmap(pos):
             self.current = Shape()
@@ -715,8 +712,8 @@ class Canvas(QWidget):
         arr = cv2.cvtColor(arr, cv2.COLOR_RGBA2RGB)
 
         cnt_germ, cnt_nongerm = classifySeeds(arr)
-        print(cnt_germ)
-        print(cnt_nongerm)
+        # print(cnt_germ)
+        # print(cnt_nongerm)
 
         for germ in cnt_germ:
             minX = germ[0]
@@ -758,31 +755,7 @@ class Canvas(QWidget):
             self.newShape.emit()
             self.update()
             self.repaint()
-        # print(image_QT.size())
-        # print(image_QT.size()[0])
-        # print(image_QT.size()[1])
-        # # print(image_QT.shape)
-        # image_CV = cv2.mat(image_QT.size[0],image_QT.size[1], cv2.CV_8uC3, image_QT.scaneline())
-        for i in range(3):
-            minX = minY= 10 + len(self.shapes)*30
-            maxX = maxY= 100 + len(self.shapes)*30
-            # print(minX, minY)
-            # print(maxX, maxY)
             
-            self.current = Shape()
-            self.current.addPoint(QPointF(minX, minY))
-            self.current.addPoint(QPointF(maxX, minY))
-            self.current.addPoint(QPointF(maxX, maxY))
-            self.current.addPoint(QPointF(minX, maxY))
-            self.current.label = "germinated"
-            self.current.close()
-
-            self.shapes.append(self.current)
-            self.current = None
-            self.newShape.emit()
-            self.update()
-            self.repaint()
-
             
 
     def setShapeVisible(self, shape, value):
