@@ -265,7 +265,7 @@ class MainWindow(QMainWindow, WindowMixin):
                       'Ctrl+D', 'copy', getStr('dupBoxDetail'),
                       enabled=False)
         detect = action("Detect Shapes", self.detectShape,
-                        'w', 'new', getStr('crtBoxDetail'), enabled=False)
+                        'd', 'detect', getStr('crtBoxDetail'), enabled=False)
 
         advancedMode = action(getStr('advancedMode'), self.toggleAdvancedMode,
                               'Ctrl+Shift+A', 'expert', getStr('advancedModeDetail'),

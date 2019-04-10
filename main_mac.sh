@@ -4,10 +4,10 @@ cd $( dirname "${BASH_SOURCE[0]}" )
 conda --version
 # source deactivate
 # conda remove --name pyqt --all
-conda create -n pyqt lxml
+conda create -y -n pyqt lxml
 source activate pyqt
-conda install python pylint pep8 flake8 yapf lxml
-conda install -c menpo opencv
+conda install -y python pylint pep8 flake8 yapf lxml
+conda install -y opencv -c menpo 
 # pip install opencv-python
 pip install PyQt5
 pyrcc5 -o resources.py resources.qrc
